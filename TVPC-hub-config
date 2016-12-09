@@ -1,9 +1,9 @@
 TVPCCSR1#show run
 Building configuration...
 
-Current configuration : 5259 bytes
+Current configuration : 5563 bytes
 !
-! Last configuration change at 15:53:05 UTC Fri Dec 9 2016 by ec2-user
+! Last configuration change at 18:43:38 UTC Fri Dec 9 2016 by ec2-user
 !
 version 16.3
 service timestamps debug datetime msec
@@ -22,12 +22,17 @@ logging persistent size 1000000 filesize 8192 immediate
 no aaa new-model
 !
 ip vrf spoke1tun1
- rd 64512:1
+ rd 64512:11
  route-target export 64512:0
  route-target import 64512:0
 !
 ip vrf spoke1tun2
- rd 64512:2
+ rd 64512:12
+ route-target export 64512:1
+ route-target import 64512:1
+!
+ip vrf spoke2tun1
+ rd 64512:21
  route-target export 64512:0
  route-target import 64512:0
 !
@@ -39,12 +44,12 @@ ip vrf spoke1tun2
 !
 !
 !
-
+          
 
 
 !
 !
-!         
+!
 !
 !
 !
@@ -61,7 +66,7 @@ multilink bundle-name authenticated
 !
 !
 !
-!
+!         
 crypto pki trustpoint TP-self-signed-1849756412
  enrollment selfsigned
  subject-name cn=IOS-Self-Signed-Certificate-1849756412
@@ -105,7 +110,7 @@ crypto pki certificate chain TP-self-signed-1849756412
 !
 !
 !
-!
+!         
 !
 license udi pid CSR1000V sn 9ODLUQCQE9C
 diagnostic bootup level minimal
@@ -127,12 +132,12 @@ redundancy
 !
 !
 !
-!
+!         
 crypto isakmp policy 1
  encr aes 256
  hash sha256
  authentication pre-share
- group 2  
+ group 2
 crypto isakmp key ciscokey address 0.0.0.0        
 !
 crypto ipsec security-association lifetime seconds 28800
@@ -149,18 +154,19 @@ crypto ipsec profile csrpoc
 !
 !
 !
-!
-!
-!
-! 
-! 
 !         
+!
+!
+! 
+! 
+! 
 ! 
 ! 
 ! 
 !
 !
 interface Tunnel0
+ ip vrf forwarding spoke1tun1
  ip address 192.168.1.1 255.255.255.0
  load-interval 30
  tunnel source GigabitEthernet1
@@ -169,6 +175,7 @@ interface Tunnel0
  tunnel protection ipsec profile csrpoc
 !
 interface Tunnel1
+ ip vrf forwarding spoke2tun1
  ip address 192.168.2.1 255.255.255.0
  load-interval 30
  tunnel source GigabitEthernet1
@@ -183,17 +190,22 @@ interface GigabitEthernet1
 !
 router bgp 100
  bgp log-neighbor-changes
- neighbor 192.168.1.2 remote-as 101
- neighbor 192.168.1.2 log-neighbor-changes
- neighbor 192.168.1.2 timers 10 30 30
- neighbor 192.168.2.2 remote-as 102
- neighbor 192.168.2.2 log-neighbor-changes
- neighbor 192.168.2.2 timers 10 30 30
  !
- address-family ipv4
+ address-family ipv4 vrf spoke1tun1
+  neighbor 192.168.1.2 remote-as 101
+  neighbor 192.168.1.2 log-neighbor-changes
+  neighbor 192.168.1.2 timers 10 30 30
   neighbor 192.168.1.2 activate
+  neighbor 192.168.1.2 as-override
   neighbor 192.168.1.2 soft-reconfiguration inbound
+ exit-address-family
+ !
+ address-family ipv4 vrf spoke2tun1
+  neighbor 192.168.2.2 remote-as 102
+  neighbor 192.168.2.2 log-neighbor-changes
+  neighbor 192.168.2.2 timers 10 30 30
   neighbor 192.168.2.2 activate
+  neighbor 192.168.2.2 as-override
   neighbor 192.168.2.2 soft-reconfiguration inbound
  exit-address-family
 !
@@ -220,7 +232,7 @@ ip ssh pubkey-chain
 !
 !
 control-plane
-!         
+!
  !
  !
  !
@@ -242,7 +254,7 @@ line vty 0 4
 !
 !
 !
-!         
+!
 end
 
 TVPCCSR1#
