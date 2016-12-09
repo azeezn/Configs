@@ -1,0 +1,233 @@
+SVPC1CSR#show run
+Building configuration...
+
+Current configuration : 4766 bytes
+!
+! Last configuration change at 15:52:58 UTC Fri Dec 9 2016 by ec2-user
+!
+version 16.3
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no platform punt-keepalive disable-kernel-core
+platform console virtual
+!
+hostname SVPC1CSR
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging persistent size 1000000 filesize 8192 immediate
+!
+no aaa new-model
+!
+ip vrf tunnel0
+ rd 64512:1
+ route-target export 64512:0
+ route-target import 64512:0
+!
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!         
+subscriber templating
+!
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+crypto pki trustpoint TP-self-signed-1288803480
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-1288803480
+ revocation-check none
+ rsakeypair TP-self-signed-1288803480
+!
+!
+crypto pki certificate chain TP-self-signed-1288803480
+ certificate self-signed 01
+  30820330 30820218 A0030201 02020101 300D0609 2A864886 F70D0101 05050030 
+  31312F30 2D060355 04031326 494F532D 53656C66 2D536967 6E65642D 43657274 
+  69666963 6174652D 31323838 38303334 3830301E 170D3136 31323035 31393333 
+  30365A17 0D323030 31303130 30303030 305A3031 312F302D 06035504 03132649 
+  4F532D53 656C662D 5369676E 65642D43 65727469 66696361 74652D31 32383838 
+  30333438 30308201 22300D06 092A8648 86F70D01 01010500 0382010F 00308201 
+  0A028201 0100C00E 7C63C791 9A461B22 CFEA7E9D 59D0D8D1 C2510900 A0516B6B 
+  25FB0602 A49F0C1E 00AE5DF7 45937C20 7CC6D947 E5F093C1 282A0DBA B695D79F 
+  0992CCE2 DDB63B63 50016751 6A221AAE CC6588F3 83967DF8 BB2FB9E6 7A1F7AEE 
+  AA8E8A9B 0181F84E 07AAAF3E 09C45B64 702B4250 4AF1BE1F 1A962B63 120ABC4A 
+  69E31A41 DAD9FB8E CD60339B 1DB7205A 5FC89069 74E45E6B CBA6E079 A6569903 
+  61E666C0 FE4C5C36 D366DA9D F762B507 333F1ACF 1C9BFA05 54BA9BC5 6283A8FE 
+  E62F4FDB 73062042 F904FD69 3DE1508E F47476C4 AB7F3F46 0889BC5E 056AB02E 
+  438532BD 83026AB0 3B3ECBA8 0CB95855 9AEFE559 1CB86C0D 2A613CC7 B780746A 
+  007F0FF2 B9E50203 010001A3 53305130 0F060355 1D130101 FF040530 030101FF 
+  301F0603 551D2304 18301680 14039906 DA142BEC 98B2BADC EE954A9D 2D2B556A 
+  A2301D06 03551D0E 04160414 039906DA 142BEC98 B2BADCEE 954A9D2D 2B556AA2 
+  300D0609 2A864886 F70D0101 05050003 82010100 32666AB6 74A25F8D 0E364DD9 
+  4C629C81 2A7E9C84 3693C31A 617E256E 30F98FBA 1996D3AC FF544D65 F60C3D35 
+  466F4034 1B521917 264938C9 C535CA01 3DAD1CB4 703785D6 2D7878D4 A4007961 
+  384353DB 2184F781 2B85B33A 435BA0EB 908FEFBE 2F6B9FA7 479D582B 4C0AF39B 
+  EEADCC0C 5D182F4D 2CD86AC8 956AF394 B982308E 6436A06B 89343113 B6DEE737 
+  78CF0221 9D7F0C59 06C78B4A CF133C1B E5EF3E9D 7CB9208A 1B1FE937 3F2F4C9C 
+  D9168001 6761C6A1 9E8AE7BB 36516263 9D193A37 F07D5F15 33731735 DEFB28BC 
+  565EA4FA 55C6F703 82DAC3B7 67B0284F 8D482298 672DE86C D65F9537 1A39175B 
+  1BC11643 F82C04D8 7AAEF29F 07CEC19F 596CBC40
+        quit
+
+
+!
+!
+!
+!
+!
+!
+!
+license udi pid CSR1000V sn 9FCS32UWQKN
+diagnostic bootup level minimal
+!
+spanning-tree extend system-id
+!
+username ec2-user privilege 15 secret 5 $1$Z.V4$bVuUKvWcG7H1UGHUE9XU10
+username azeezn privilege 15 password 0 cisco
+!
+redundancy
+!
+!
+!
+!
+!         
+!
+! 
+!
+!
+!
+!
+!
+crypto isakmp policy 1
+ encr aes 256
+ hash sha256
+ authentication pre-share
+ group 2
+crypto isakmp key ciscokey address 0.0.0.0        
+!
+crypto ipsec security-association lifetime seconds 28800
+crypto ipsec security-association replay window-size 1024
+!
+crypto ipsec transform-set csrpoc esp-aes 256 esp-sha256-hmac 
+ mode tunnel
+!
+crypto ipsec profile csrpoc
+ set security-association lifetime seconds 28800
+ set security-association replay window-size 1024 
+ set transform-set csrpoc 
+ set pfs group2
+!
+!
+!
+!
+!
+!
+! 
+! 
+! 
+! 
+! 
+! 
+!
+!
+interface Loopback0
+ ip address 172.1.1.2 255.255.255.255
+!
+interface Tunnel0
+ ip address 192.168.1.2 255.255.255.0
+ load-interval 30
+ tunnel source GigabitEthernet1
+ tunnel mode ipsec ipv4
+ tunnel destination 34.192.89.73
+ tunnel protection ipsec profile csrpoc
+!
+interface GigabitEthernet1
+ ip address dhcp
+ load-interval 30
+ negotiation auto
+!
+router bgp 101
+ bgp log-neighbor-changes
+ neighbor 192.168.1.1 remote-as 100
+ neighbor 192.168.1.1 log-neighbor-changes
+ neighbor 192.168.1.1 timers 10 30 30
+ !
+ address-family ipv4
+  network 172.1.0.0
+  redistribute connected
+  neighbor 192.168.1.1 activate
+ exit-address-family
+!
+!
+virtual-service csr_mgmt
+ ip shared host-interface GigabitEthernet1
+ activate
+!
+ip forward-protocol nd
+ip http server
+ip http authentication local
+ip http secure-server
+!
+ip route 192.168.1.1 255.255.255.255 Tunnel0
+ip ssh rsa keypair-name ssh-key
+ip ssh version 2
+ip ssh pubkey-chain
+  username ec2-user
+   key-hash ssh-rsa 8934A48490AF94DF44DF5EC92BF61A5F ec2-user
+!
+!
+!
+!
+!
+control-plane
+!
+ !
+ !        
+ !
+ !
+!
+!
+!
+!
+!
+line con 0
+ stopbits 1
+line vty 0 4
+ exec-timeout 0 0
+ logging synchronous
+ login local
+ transport input ssh
+!
+!
+!
+!
+!
+!
+end
+
+SVPC1CSR#
