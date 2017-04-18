@@ -1,0 +1,86 @@
+TVPCCSR1#show run
+!
+ip vrf spoke1tun1
+ rd 64512:11
+ import ipv4 unicast map GRT2VRF
+ export ipv4 unicast map VRF2GRT
+ route-target export 64512:0
+ route-target import 64512:0
+!
+!
+crypto isakmp policy 1
+ encr aes 256
+ hash sha256
+ authentication pre-share
+ group 2
+crypto isakmp key ciscokey address 0.0.0.0        
+!
+crypto ipsec security-association replay window-size 1024
+!
+crypto ipsec transform-set csrpoc esp-aes 256 esp-sha256-hmac 
+ mode tunnel
+!
+crypto ipsec profile csrpoc
+ set security-association idle-time 60
+ set security-association replay window-size 1024 
+ set transform-set csrpoc 
+ set pfs group2
+!
+interface Loopback118
+ ip address 118.18.18.1 255.255.255.0
+!
+interface Tunnel1011
+ ip vrf forwarding spoke1tun1
+ ip address 192.168.1.1 255.255.255.0
+ load-interval 30
+ tunnel source GigabitEthernet1
+ tunnel mode ipsec ipv4
+ tunnel destination 34.192.89.134
+ tunnel protection ipsec profile csrpoc
+!
+!
+interface GigabitEthernet1
+ ip address dhcp
+ load-interval 30
+ speed 10000
+ no negotiation auto
+!         
+router bgp 100
+ bgp log-neighbor-changes
+ !
+ address-family ipv4
+  network 118.18.18.0 mask 255.255.255.0
+ exit-address-family
+ !
+ address-family ipv4 vrf spoke1tun1
+  redistribute connected
+  neighbor 192.168.1.2 remote-as 101
+  neighbor 192.168.1.2 log-neighbor-changes
+  neighbor 192.168.1.2 timers 10 30 30
+  neighbor 192.168.1.2 activate
+  neighbor 192.168.1.2 as-override
+  neighbor 192.168.1.2 soft-reconfiguration inbound
+ exit-address-family
+ !
+!
+ip prefix-list GLOBAL seq 4 permit 118.18.18.0/24
+!
+ip prefix-list VRF seq 4 permit 119.19.19.0/24
+!
+!
+route-map GRT2VRF permit 10
+ match ip address prefix-list GLOBAL
+!
+route-map VRF2GRT permit 10
+ match ip address prefix-list VRF
+!
+end
+
+TVPCCSR1#
+TVPCCSR1#ping 119.19.19.1 source 118.18.18.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 119.19.19.1, timeout is 2 seconds:
+Packet sent with a source address of 118.18.18.1 
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 2/15/24 ms
+TVPCCSR1#
