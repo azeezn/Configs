@@ -1,0 +1,67 @@
+SVPC1CSR1#show run
+!
+crypto isakmp policy 1
+ encr aes 256
+ hash sha256
+ authentication pre-share
+ group 2
+crypto isakmp key ciscokey address 0.0.0.0        
+!
+crypto ipsec security-association replay window-size 1024
+!
+crypto ipsec transform-set csrpoc esp-aes 256 esp-sha256-hmac 
+ mode tunnel
+!
+crypto ipsec profile csrpoc
+ set security-association idle-time 60
+ set security-association replay window-size 1024 
+ set transform-set csrpoc 
+ set pfs group2
+!
+interface Loopback0
+ ip address 172.1.1.2 255.255.255.255
+!
+interface Loopback119
+ ip address 119.19.19.1 255.255.255.0
+!
+interface Tunnel0
+ ip address 192.168.1.2 255.255.255.0
+ load-interval 30
+ tunnel source GigabitEthernet1
+ tunnel mode ipsec ipv4
+ tunnel destination 34.192.89.73
+ tunnel protection ipsec profile csrpoc
+!
+interface GigabitEthernet1
+ ip address dhcp
+ load-interval 30
+ speed 10000
+ no negotiation auto
+!
+router bgp 101
+ bgp log-neighbor-changes
+ neighbor 192.168.1.1 remote-as 100
+ neighbor 192.168.1.1 log-neighbor-changes
+ neighbor 192.168.1.1 timers 10 30 30
+ neighbor 192.168.13.1 remote-as 1002
+ neighbor 192.168.13.1 log-neighbor-changes
+ neighbor 192.168.13.1 timers 10 30 30
+ !
+ address-family ipv4
+  network 10.255.2.0
+  network 172.1.0.0
+  redistribute connected
+  neighbor 192.168.1.1 activate
+  neighbor 192.168.13.1 activate
+ exit-address-family
+!
+end
+
+SVPC1CSR1# 
+SVPC1CSR1#ping 118.18.18.1 source 119.19.19.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 118.18.18.1, timeout is 2 seconds:
+Packet sent with a source address of 119.19.19.1 
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 2/15/24 ms
+SVPC1CSR1#
