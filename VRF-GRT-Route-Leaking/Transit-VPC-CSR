@@ -84,3 +84,103 @@ Packet sent with a source address of 118.18.18.1
 !!!!!
 Success rate is 100 percent (5/5), round-trip min/avg/max = 2/15/24 ms
 TVPCCSR1#
+TVPCCSR1#show ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+
+Gateway of last resort is 10.1.1.1 to network 0.0.0.0
+
+S*    0.0.0.0/0 [254/0] via 10.1.1.1
+      10.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+C        10.1.1.0/24 is directly connected, GigabitEthernet1
+L        10.1.1.11/32 is directly connected, GigabitEthernet1
+      118.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+C        118.18.18.0/24 is directly connected, Loopback118
+L        118.18.18.1/32 is directly connected, Loopback118
+      119.0.0.0/24 is subnetted, 1 subnets
+B        119.19.19.0 [20/0] via 192.168.1.2 (spoke1tun1), 00:22:13
+TVPCCSR1#
+TVPCCSR1#show ip bgp 
+BGP table version is 3, local router ID is 10.1.1.11
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal, 
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter, 
+              x best-external, a additional-path, c RIB-compressed, 
+Origin codes: i - IGP, e - EGP, ? - incomplete
+RPKI validation codes: V valid, I invalid, N Not found
+
+     Network          Next Hop            Metric LocPrf Weight Path
+ *>  118.18.18.0/24   0.0.0.0                  0         32768 i
+ *>  119.19.19.0/24   192.168.1.2              0             0 101 ?
+TVPCCSR1#
+TVPCCSR1#show ip route vrf spoke1tun1
+
+Routing Table: spoke1tun1
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override, p - overrides from PfR
+
+Gateway of last resort is not set
+
+      10.0.0.0/24 is subnetted, 4 subnets
+B        10.254.1.0 [20/0] via 192.168.2.2 (spoke2tun1), 02:00:18
+B        10.254.2.0 [20/0] via 192.168.2.2 (spoke2tun1), 02:00:18
+B        10.255.1.0 [20/0] via 192.168.1.2, 02:00:15
+B        10.255.2.0 [20/0] via 192.168.1.2, 02:00:15
+      17.0.0.0/30 is subnetted, 1 subnets
+B        17.1.1.0 [20/0] via 192.168.1.2, 02:00:15
+      19.0.0.0/30 is subnetted, 1 subnets
+B        19.1.1.0 [20/0] via 192.168.2.2 (spoke2tun1), 02:00:18
+      118.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+B        118.18.18.0/24 is directly connected, 00:11:00, Loopback118
+L        118.18.18.1/32 is directly connected, Loopback118
+      119.0.0.0/24 is subnetted, 1 subnets
+B        119.19.19.0 [20/0] via 192.168.1.2, 00:22:29
+      172.1.0.0/32 is subnetted, 1 subnets
+B        172.1.1.2 [20/0] via 192.168.1.2, 02:00:15
+      172.2.0.0/32 is subnetted, 1 subnets
+B        172.2.1.2 [20/0] via 192.168.2.2 (spoke2tun1), 02:00:18
+      192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.1.0/24 is directly connected, Tunnel1011
+L        192.168.1.1/32 is directly connected, Tunnel1011
+B     192.168.2.0/24 [20/0] via 192.168.2.2 (spoke2tun1), 02:00:18
+TVPCCSR1#
+TVPCCSR1#show ip bgp vpnv4 all
+BGP table version is 62, local router ID is 10.1.1.11
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal, 
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter, 
+              x best-external, a additional-path, c RIB-compressed, 
+Origin codes: i - IGP, e - EGP, ? - incomplete
+RPKI validation codes: V valid, I invalid, N Not found
+
+     Network          Next Hop            Metric LocPrf Weight Path
+Route Distinguisher: 64512:11 (default for vrf spoke1tun1)
+Import Map: GRT2VRF, Address-Family: IPv4 Unicast, Pfx Count/Limit: 1/1000
+Export Map: VRF2GRT, Address-Family: IPv4 Unicast, Pfx Count/Limit: 1/1000
+ *>  10.254.1.0/24    192.168.2.2              0             0 102 ?
+ *>  10.254.2.0/24    192.168.2.2              0             0 102 ?
+ *>  10.255.1.0/24    192.168.1.2              0             0 101 ?
+ *>  10.255.2.0/24    192.168.1.2              0             0 101 ?
+ *>  17.1.1.0/30      192.168.1.2              0             0 101 ?
+ *>  19.1.1.0/30      192.168.2.2              0             0 102 ?
+ *>  118.18.18.0/24   0.0.0.0                  0         32768 i
+ *>  119.19.19.0/24   192.168.1.2              0             0 101 ?
+ *>  172.1.1.2/32     192.168.1.2              0             0 101 ?
+ *>  172.2.1.2/32     192.168.2.2              0             0 102 ?
+ *   192.168.1.0      192.168.1.2              0             0 101 ?
+ *>                   0.0.0.0                  0         32768 ?
+ *>  192.168.2.0      192.168.2.2              0             0 102 ?
+TVPCCSR1# 
+
